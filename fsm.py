@@ -2,7 +2,7 @@ import os
 import csv
 from transitions.extensions import GraphMachine
 from linebot import LineBotApi
-from linebot.models import MessageEvent, TextMessage, TextSendMessage, TemplateSendMessage,ButtonsTemplate,MessageTemplateAction
+from linebot.models import MessageEvent, TextMessage, MessageTemplateAction, TextSendMessage, PostbackAction,URIAction, MessageAction, TemplateSendMessage, ButtonsTemplate
 from utils import send_text_message
 
 channel_access_token = os.getenv("LINE_CHANNEL_ACCESS_TOKEN", None)
@@ -63,6 +63,14 @@ class TocMachine(GraphMachine):
         cmd = event.message.text.split(" ")
         return cmd[0] == '申辦'
 
+    def is_going_to_state14(self, event):
+        cmd = event.message.text.split(" ")
+        return cmd[0] == '旅遊趣'
+
+    def is_going_to_state15(self, event):
+        cmd = event.message.text.split(" ")
+        return cmd[0] == '吃透透'
+
     def on_enter_state1(self, event):
         print("I'm entering state1")
         line_bot_api = LineBotApi(channel_access_token)
@@ -83,7 +91,7 @@ class TocMachine(GraphMachine):
         print("I'm entering state2")
 
         reply_token = event.reply_token
-        send_text_message(reply_token, "請輸入想去的地區或景點關鍵字我們將為您推薦遊客評價最好的5間餐廳，使用以下形式\n旅遊趣 關鍵字\nex:旅遊趣 遊樂園")
+        send_text_message(reply_token, "請輸入想去的地區或景點關鍵字我們將為您推薦遊客評價最好的前3個景點，使用以下形式\n旅遊趣 關鍵字\nex:旅遊趣 遊樂園")
         self.go_back()
 
     def on_exit_state2(self):
@@ -93,7 +101,7 @@ class TocMachine(GraphMachine):
         print("I'm entering state3")
 
         reply_token = event.reply_token
-        send_text_message(reply_token, "請輸入想去的餐廳地區及類型，使用以下形式\n吃透透 地區 類別\nex:吃透透 台中市 日式料理")
+        send_text_message(reply_token, "請輸入想去的餐廳地區及類型我們將為您推薦遊客評價最好的3間餐廳，使用以下形式\n吃透透 地區 類別\nex:吃透透 台中市 日式料理")
         self.go_back()
 
     def on_exit_state3(self):
@@ -170,7 +178,7 @@ class TocMachine(GraphMachine):
     def on_enter_state8(self, event):
         print("I'm entering state8")
         reply_token = event.reply_token
-        send_text_message(reply_token, "今天您想怎麼度過您的假期呢?\n想尋找美食 請打美食\n想尋找觀光景點 請打旅遊\n實在是難以抉擇嗎?不如讓我們來幫你決定\n做一個簡單的小問卷，讓我們告訴您什麼樣的假期適合您 請打協助")
+        send_text_message(reply_token, "今天您想怎麼度過您的假期呢?\n想尋找美食 請打美食\n想尋找觀光景點 請打旅遊\n實在是難以抉擇嗎?不如讓我們來幫你決定\n做一個簡單的小問卷，讓我們告訴您什麼樣的假期適合您 請打協助\n處理會員服務 請打會員\n現在加入會員就送 星巴克買一送一禮卷一張\n心動不如馬上行動")
         self.go_back()
 
     def on_exit_state8(self):
@@ -220,7 +228,7 @@ class TocMachine(GraphMachine):
             rows = csv.reader(csvfile)
 
             for row in rows:
-                if row[2]==cmd[1]:
+                if row[2] == cmd[1]:
                     s = "會員姓名:"+row[0]+" 會員手機:"+row[1]+" 還有"+row[3]+"張優惠券未使用喔"
                     send_text_message(reply_token, s)
 
@@ -247,3 +255,24 @@ class TocMachine(GraphMachine):
 
     def on_exit_state13(self):
         print("Leaving state13")
+
+    def on_enter_state14(self, event):
+        print("I'm entering state14")
+        reply_token = event.reply_token
+        cmd = event.message.text.split(" ")
+        send_text_message(reply_token, "很抱歉這項服務還在開發中")
+
+        self.go_back()
+
+    def on_exit_state14(self):
+        print("Leaving state14")
+
+    def on_enter_state15(self, event):
+        print("I'm entering state15")
+        reply_token = event.reply_token
+        cmd = event.message.text.split(" ")
+        send_text_message(reply_token, "很抱歉這項服務還在開發中")
+        self.go_back()
+
+    def on_exit_state15(self):
+        print("Leaving state15")
